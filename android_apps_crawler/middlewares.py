@@ -1,3 +1,7 @@
-from scrapy.contrib.downloadermiddleware import DownloaderMiddleware
+from scrapy.exceptions import IgnoreRequest
 
-class 
+class DownloaderMiddleware(object):
+    def process_request(self, request, spider):
+        if request.url[-3:] in ["apk", "png"]:
+            print "Ignore request!"
+            raise IgnoreRequest

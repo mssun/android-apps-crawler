@@ -18,3 +18,6 @@ ITEM_PIPELINES = [
     'android_apps_crawler.pipelines.SQLitePipeline'
 ]
 LOG_LEVEL = 'INFO'
+DOWNLOADER_MIDDLEWARES = {
+    'android_apps_crawler.middlewares.DownloaderMiddleware': 1,
+}
