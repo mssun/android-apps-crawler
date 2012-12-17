@@ -1,6 +1,7 @@
 from scrapy.spider import BaseSpider
 from scrapy.selector import HtmlXPathSelector
 from scrapy.http import Request
+from scrapy.http import HtmlResponse
 from scrapy import log
 
 from urlparse import urlparse
@@ -16,6 +17,9 @@ class AndroidAppsSpider(BaseSpider):
     ]
 
     def parse(self, response):
+        if not isinstance(response, HtmlResponse):
+            print "!!!!!!!!!!!!!!!!!!!!!%s" % response.url
+            return
         response_domain = urlparse(response.url).netloc
         appItemList = []
         if "appchina" in response_domain:
