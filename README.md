@@ -15,5 +15,6 @@ Requirements
 
 Supported Third-party Markets
 -----------------------------
-* AppChina: http://www.appchina.com/
+* AppChina: http://www.appchina.com
+* Hiapk: http://apk.hiapk.com
 * Keep adding...
