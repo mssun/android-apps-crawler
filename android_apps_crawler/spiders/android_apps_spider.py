@@ -17,9 +17,6 @@ class AndroidAppsSpider(BaseSpider):
     ]
 
     def parse(self, response):
-        if not isinstance(response, HtmlResponse):
-            print "!!!!!!!!!!!!!!!!!!!!!%s" % response.url
-            return
         response_domain = urlparse(response.url).netloc
         appItemList = []
         if "appchina" in response_domain:
