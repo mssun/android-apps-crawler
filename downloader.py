@@ -24,7 +24,10 @@ class Downloader:
         self.url = url
         proxy_handler = urllib2.ProxyHandler(self.proxies)
         opener = urllib2.build_opener(proxy_handler)
-        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+        opener.addheaders = [
+            ('User-Agent',r"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/5    37.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11"),
+            ('Referer', url)
+        ]
         urllib2.install_opener(opener)
         try:
             self.opening = urllib2.urlopen(self.url)
@@ -60,7 +63,9 @@ class Downloader:
             f.write(buffer)
             end_time = time.time()
             cost_time = end_time - start_time
-            status = r"%10d  [%3.2f%%] %3dk/s" % (file_size_dl,
+            if cost_time == 0:
+                cost_time = 1
+            status = r"%10d  [%3.2f%%]  %3dk/s" % (file_size_dl,
                     file_size_dl * 100. / self.file_size,
                     file_size_dl * 100. / 1024 / 1024 / cost_time)
             status = status + chr(8)*(len(status) + 1)

@@ -21,3 +21,15 @@ LOG_LEVEL = 'INFO'
 DOWNLOADER_MIDDLEWARES = {
     'android_apps_crawler.middlewares.DownloaderMiddleware': 1,
 }
+PROXIES = {
+    'http' : 'http://proxy.cse.cuhk.edu.hk:8000',
+}
+
+ALLOWED_DOMAINS = [
+    "appchina.com",
+    "hiapk.com",
+]
+START_URLS = [
+    "http://www.appchina.com",
+    "http://apk.hiapk.com",
+]
