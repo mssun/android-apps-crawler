@@ -5,6 +5,7 @@ from scrapy.http import HtmlResponse
 from scrapy import log
 
 from urlparse import urlparse
+from urlparse import urljoin
 
 from android_apps_crawler.items import AppItem
 
@@ -24,6 +25,7 @@ class AndroidAppsSpider(BaseSpider):
 
         hxs = HtmlXPathSelector(response)
         for url in hxs.select('//a/@href').extract():
+            url = urljoin(response.url, url)
             yield Request(url, callback=self.parse)
 
         for item in appItemList:
