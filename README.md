@@ -3,7 +3,7 @@ Android Apps Crawler
 
 Overview
 --------
-Android Apps Crawler is an extensible crawler for Android applications in the third-party markets.
+Android Apps Crawler is an extensible crawler for downloading Android applications in the third-party markets.
 It can crawl the download url addresses of applications and automatically download applications
 into repository.
 
