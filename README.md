@@ -3,7 +3,7 @@ Android Apps Crawler
 
 Overview
 --------
-Android Apps Crawler is an extensible crawler for Android applications in the third-party markets.
+Android Apps Crawler is an extensible crawler for downloading Android applications in the third-party markets.
 It can crawl the download url addresses of applications and automatically download applications
 into repository.
 
@@ -18,11 +18,11 @@ Usage
 * Set the third-party markets you want to crawl in settings.py
 * Set the proxy if you have
 * Start crawler: 
-```bash
+```
 scrapy crawl android_apps_spider
 ```
 * Start downloader:
-```bash
+```
 python downloader.py repository_name apps_database_name
 ```
 
