@@ -5,7 +5,8 @@ import time
 import urllib2
 import sys
 import sqlite3
-from multiprocessing import Process
+from multiprocessing import Process, Lock
+from threading import Thread
 import Queue
 
 class Downloader:
@@ -21,6 +22,7 @@ class Downloader:
     def __init__(self, repo, proxies={}):
         self.proxies = proxies
         self.repo = repo
+        self.start_time = time.time()
 
     def open(self, url):
         self.url = url
@@ -42,7 +44,7 @@ class Downloader:
         last_modified_str = meta.getheaders("Last-Modified")[0]
         self.last_modified = datetime.strptime(last_modified_str,
                 '%a, %d %b %Y %H:%M:%S %Z')
-        print "Last modified: %s" % self.last_modified
+        #print "Last modified: %s" % self.last_modified
         return True
 
     
@@ -54,26 +56,29 @@ class Downloader:
             os.makedirs(self.repo + os.sep +"tmp") 
         tmp_file_path = self.repo + os.sep + "tmp" + os.sep + self.file_name
         f = open(tmp_file_path, 'wb')
-        print "Downloading: %s Bytes: %s" % (self.file_name, self.file_size)
-        file_size_dl = 0
+        #print "Downloading: %s Bytes: %s" % (self.file_name, self.file_size)
+        self.file_size_dl = 0
         block_sz = 8192
-        start_time = time.time()
         while True:
             buffer = self.opening.read(block_sz)
             if not buffer:
                 break
 
-            file_size_dl += len(buffer)
+            self.file_size_dl += len(buffer)
             f.write(buffer)
-            end_time = time.time()
-            cost_time = end_time - start_time
-            if cost_time == 0:
-                cost_time = 1
-            status = "\r%10d  [%3.2f%%]  %3dk/s" % (file_size_dl,
-                    file_size_dl * 100. / self.file_size,
-                    file_size_dl * 100. / 1024 / 1024 / cost_time)
-            print status,
-            sys.stdout.flush()
+            self.print_status()
+            #end_time = time.time()
+            #cost_time = end_time - start_time
+            #if cost_time == 0:
+            #    cost_time = 1
+            #rate =  file_size_dl * 100. / 1024 / 1024 / cost_time
+            #progress =  file_size_dl * 100. / self.file_size
+            #
+            #status = "\r%10d  [%3.2f%%]  %3dk/s" % (file_size_dl,
+            #        progress,
+            #        rate)
+            #print status,
+            #sys.stdout.flush()
         f.close()
 
         f = open(tmp_file_path, 'r')
@@ -88,40 +93,85 @@ class Downloader:
         else:
             os.rename(tmp_file_path, new_path)
         print "Finish! Store as: %s" % new_file_name
+    def print_status(self):
+        file_name, file_size, progress, rate = self.get_status()
+        print "\r%10d [%3.2f%%] %3dk/s" % (file_size, progress, rate),
+        sys.stdout.flush()
 
+    def get_status(self):
+        end_time = time.time()
+        cost_time = end_time - self.start_time
+        if cost_time == 0:
+            cost_time = 1
+        rate =  self.file_size_dl   / 1024 / cost_time
+        progress =  self.file_size_dl * 100. / self.file_size
+        status = [self.file_name, self.file_size, progress, rate]
+        return status
+
+def get_undownloaded_url(sqlite_file, limit=1000):
+    conn = sqlite3.connect(sqlite_file)
+    urls = []
+    c = conn.cursor()
+    c.execute('select * from apps where downloaded = 0 limit %d' % limit)
+    rec = c.fetchall()
+    for r in rec:
+        urls.append(r[1])
+    conn.close()
+    return urls
+    
 
 def down_sqlite(argv):
     repo = argv[1]
     sqlite_file = argv[2]
-    conn = sqlite3.connect(sqlite_file)
-    while True:
-        c = conn.cursor()
-        c.execute('select * from apps where downloaded = 0 limit 1')
-        rec = c.fetchone()
-        url = unicode.encode(rec[1], 'gbk')
-        downloader = Downloader(repo=repo, proxies={"http":"http://proxy.cse.cuhk.edu.hk:8000"})
-        if downloader.open(url) is not True:
-            c.execute('update apps set downloaded = -1 where url = ?', (url,))
-            conn.commit()
-            continue
-        downloader.download()
-        c.execute('update apps set downloaded = 1 where url = ?', (url,))
-        conn.commit()
-        #time.sleep(5)
-    conn.close()
+    urls = get_undownloaded_url(sqlite_file)
+    queue = Queue.Queue()
+    for url in urls:
+        queue.put(url)
+    for i in range(2):
+        t = DownloadThread(queue, repo, sqlite_file)
+        t.daemon = True
+        t.start()
+    #while True:
+    #    time.sleep(5)
+    #    if (queue.qsize() < 5):
+    #        pass
+    queue.join()
+    #while True:
+    #    c = conn.cursor()
+    #    c.execute('select * from apps where downloaded = 0 limit 1')
+    #    rec = c.fetchone()
+    #    url = unicode.encode(rec[1], 'gbk')
+    #    downloader = Downloader(repo=repo, proxies={"http":"http://proxy.cse.cuhk.edu.hk:8000"})
+    #    if downloader.open(url) is not True:
+    #        c.execute('update apps set downloaded = -1 where url = ?', (url,))
+    #        conn.commit()
+    #        continue
+    #    downloader.download()
+    #    c.execute('update apps set downloaded = 1 where url = ?', (url,))
+    #    conn.commit()
+    #    #time.sleep(5)
+    #conn.close()
 
-class DownloadProcess(Process):
-    def __init__(self, queue, repo="repository", proxies={"http":"http://proxy.cse.cuhk.edu.hk:8000"}):
-        Process.__init__(self)
-        self.queue = queue
+class DownloadThread(Thread):
+    def __init__(self, queue, repo, sqlite_file, proxies={"http":"http://proxy.cse.cuhk.edu.hk:8000"}):
+        Thread.__init__(self)
         self.repo = repo
         self.proxies = proxies
+        self.sqlite_file = sqlite_file
+        self.queue = queue
+        #self.status_queue = status_queue
     def run(self):
+        conn = sqlite3.connect(self.sqlite_file)
+        c = conn.cursor()
         while True:
             url = self.queue.get()
             downloader = Downloader(repo=self.repo, proxies=self.proxies)
-            downloader.open(url)
+            if downloader.open(url) is not True:
+                c.execute('update apps set downloaded = -1 where url = ?', (url,))
+                conn.commit()
             downloader.download()
+            c.execute('update apps set downloaded = 1 where url = ?', (url,))
+            conn.commit()
             self.queue.task_done()
 
 def test(argv):
