@@ -34,6 +34,9 @@ class AndroidAppsSpider(BaseSpider):
         elif "anzhi" in response_domain:
             xpath = "//div[@id='btn']/a/@onclick"
             appItemList.extend(self.parse_anzhi(response, xpath))
+        #elif "androiddrawer" in response_domain:
+        #    xpath = "//a[@class='downloadbtn green nice button radius viewmore']/@href"
+        #    appItemList.extend(self.parse_xpath(response, xpath))
         else:
             pass
         hxs = HtmlXPathSelector(response)

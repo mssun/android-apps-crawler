@@ -8,6 +8,7 @@ import sqlite3
 from multiprocessing import Process, Lock
 from threading import Thread
 import Queue
+from android_apps_crawler import settings
 
 class Downloader:
     proxies = {}
@@ -128,7 +129,7 @@ def down_sqlite(argv):
     for url in urls:
         queue.put(url)
     for i in range(2):
-        t = DownloadThread(queue, repo, sqlite_file)
+        t = DownloadThread(queue, repo, sqlite_file, settings.PROXIES)
         t.daemon = True
         t.start()
     #while True:
@@ -153,7 +154,7 @@ def down_sqlite(argv):
     #conn.close()
 
 class DownloadThread(Thread):
-    def __init__(self, queue, repo, sqlite_file, proxies={"http":"http://proxy.cse.cuhk.edu.hk:8000"}):
+    def __init__(self, queue, repo, sqlite_file, proxies):
         Thread.__init__(self)
         self.repo = repo
         self.proxies = proxies
