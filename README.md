@@ -31,4 +31,5 @@ Supported Third-party Markets
 * AppChina: http://www.appchina.com
 * Hiapk: http://apk.hiapk.com
 * Anzhi: http://www.anzhi.com
+* android.d.cn: http://android.d.cn
 * Keep adding...
