@@ -28,10 +28,12 @@ PROXIES = {
 ALLOWED_DOMAINS = [
     #"appchina.com",
     #"hiapk.com",
-    "anzhi.com",
+    #"anzhi.com",
+    "android.d.cn",
 ]
 START_URLS = [
     #"http://www.appchina.com",
     #"http://apk.hiapk.com",
-    "http://www.anzhi.com",
+    #"http://www.anzhi.com",
+    "http://android.d.cn",
 ]

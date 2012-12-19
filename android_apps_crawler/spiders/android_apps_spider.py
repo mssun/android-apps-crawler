@@ -28,6 +28,9 @@ class AndroidAppsSpider(BaseSpider):
         elif "hiapk" in response_domain:
             xpath = "//a[@class='linkbtn d1']/@href"
             appItemList.extend(self.parse_xpath(response, xpath))
+        elif "android.d.cn" in response_domain:
+            xpath = "//a[@class='down']/@href"
+            appItemList.extend(self.parse_xpath(response, xpath))
         elif "anzhi" in response_domain:
             xpath = "//div[@id='btn']/a/@onclick"
             appItemList.extend(self.parse_anzhi(response, xpath))
