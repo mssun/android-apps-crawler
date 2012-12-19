@@ -32,4 +32,5 @@ Supported Third-party Markets
 * Hiapk: http://apk.hiapk.com
 * Anzhi: http://www.anzhi.com
 * android.d.cn: http://android.d.cn
+* mumayi: http://www.mumayi.com
 * Keep adding...
