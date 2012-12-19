@@ -18,11 +18,11 @@ Usage
 * Set the third-party markets you want to crawl in settings.py
 * Set the proxy if you have
 * Start crawler: 
-```bash
+```
 scrapy crawl android_apps_spider
 ```
 * Start downloader:
-```bash
+```
 python downloader.py repository_name apps_database_name
 ```
 
