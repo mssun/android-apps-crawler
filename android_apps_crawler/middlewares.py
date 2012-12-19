@@ -3,7 +3,7 @@ from scrapy.exceptions import IgnoreRequest
 class DownloaderMiddleware(object):
     def process_request(self, request, spider):
         request.meta["proxy"] = spider.settings['PROXIES']['http']
-        if request.url[-3:] in ["apk", "png", "jpg", "exe"]:
+        if request.url[-3:] in ["apk", "png", "jpg", "exe", "doc"]:
             print "Ignore request!"
             raise IgnoreRequest
 

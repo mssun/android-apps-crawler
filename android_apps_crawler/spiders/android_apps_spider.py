@@ -1,3 +1,5 @@
+import re
+
 from scrapy.spider import BaseSpider
 from scrapy.selector import HtmlXPathSelector
 from scrapy.http import Request
@@ -26,6 +28,9 @@ class AndroidAppsSpider(BaseSpider):
         elif "hiapk" in response_domain:
             xpath = "//a[@class='linkbtn d1']/@href"
             appItemList.extend(self.parse_xpath(response, xpath))
+        elif "anzhi" in response_domain:
+            xpath = "//div[@id='btn']/a/@onclick"
+            appItemList.extend(self.parse_anzhi(response, xpath))
         else:
             pass
         hxs = HtmlXPathSelector(response)
@@ -60,3 +65,16 @@ class AndroidAppsSpider(BaseSpider):
             appItem['url'] = url
             appItemList.append(appItem)
         return appItemList
+    
+    def parse_anzhi(self, response, xpath):
+        appItemList = []
+        hxs = HtmlXPathSelector(response)
+        for script in hxs.select(xpath).extract():
+            id = re.search(r"\d+", script).group()
+            url = "http://www.anzhi.com/dl_app.php?s=%s&n=5" % (id,)
+            appItem = AppItem()
+            appItem['url'] = url
+            appItemList.append(appItem)
+        return appItemList
+
+            

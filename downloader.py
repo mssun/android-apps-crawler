@@ -5,6 +5,8 @@ import time
 import urllib2
 import sys
 import sqlite3
+from multiprocessing import Process
+import Queue
 
 class Downloader:
     proxies = {}
@@ -25,7 +27,7 @@ class Downloader:
         proxy_handler = urllib2.ProxyHandler(self.proxies)
         opener = urllib2.build_opener(proxy_handler)
         opener.addheaders = [
-            ('User-Agent',r"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/5    37.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11"),
+            ('User-Agent',r"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11"),
             ('Referer', url)
         ]
         urllib2.install_opener(opener)
@@ -33,6 +35,7 @@ class Downloader:
             self.opening = urllib2.urlopen(self.url)
         except urllib2.HTTPError:
             print "HTTPError" 
+            return False
         meta = self.opening.info()
         #print meta
         self.file_size = int(meta.getheaders("Content-Length")[0])
@@ -40,6 +43,7 @@ class Downloader:
         self.last_modified = datetime.strptime(last_modified_str,
                 '%a, %d %b %Y %H:%M:%S %Z')
         print "Last modified: %s" % self.last_modified
+        return True
 
     
     def download(self):
@@ -65,11 +69,11 @@ class Downloader:
             cost_time = end_time - start_time
             if cost_time == 0:
                 cost_time = 1
-            status = r"%10d  [%3.2f%%]  %3dk/s" % (file_size_dl,
+            status = "\r%10d  [%3.2f%%]  %3dk/s" % (file_size_dl,
                     file_size_dl * 100. / self.file_size,
                     file_size_dl * 100. / 1024 / 1024 / cost_time)
-            status = status + chr(8)*(len(status) + 1)
             print status,
+            sys.stdout.flush()
         f.close()
 
         f = open(tmp_file_path, 'r')
@@ -83,7 +87,7 @@ class Downloader:
             os.remove(tmp_file_path)
         else:
             os.rename(tmp_file_path, new_path)
-        print chr(8) + "Finish! Store as: %s" % new_file_name
+        print "Finish! Store as: %s" % new_file_name
 
 
 def down_sqlite(argv):
@@ -96,23 +100,54 @@ def down_sqlite(argv):
         rec = c.fetchone()
         url = unicode.encode(rec[1], 'gbk')
         downloader = Downloader(repo=repo, proxies={"http":"http://proxy.cse.cuhk.edu.hk:8000"})
-        downloader.open(url)
+        if downloader.open(url) is not True:
+            c.execute('update apps set downloaded = -1 where url = ?', (url,))
+            conn.commit()
+            continue
         downloader.download()
         c.execute('update apps set downloaded = 1 where url = ?', (url,))
         conn.commit()
         #time.sleep(5)
     conn.close()
 
+class DownloadProcess(Process):
+    def __init__(self, queue, repo="repository", proxies={"http":"http://proxy.cse.cuhk.edu.hk:8000"}):
+        Process.__init__(self)
+        self.queue = queue
+        self.repo = repo
+        self.proxies = proxies
+    def run(self):
+        while True:
+            url = self.queue.get()
+            downloader = Downloader(repo=self.repo, proxies=self.proxies)
+            downloader.open(url)
+            downloader.download()
+            self.queue.task_done()
 
 def test(argv):
-    if len(argv) <= 1:
-        print "error"
-    else:
-        url = argv[3]
-        repo =argv[2]
-        downloader = Downloader(repo=repo, proxies={"http":"http://proxy.cse.cuhk.edu.hk:8000"})
-        downloader.open(url)
-        downloader.download()
+    #if len(argv) <= 1:
+    #    print "error"
+    #else:
+    #    url = argv[3]
+    #    repo =argv[2]
+    #    downloader = Downloader(repo=repo, proxies={"http":"http://proxy.cse.cuhk.edu.hk:8000"})
+    #    downloader.open(url)
+    #    downloader.download()
+    urls = []
+    conn = sqlite3.connect(argv[2])
+    c = conn.cursor()
+    c.execute('select * from apps where downloaded = 0 limit 15')
+    rec = c.fetchall()
+    for r in rec:
+        urls.append(r[1])
+    queue = Queue.Queue()
+    
+    for i in range(3):
+        t = DownloadProcess(queue)
+        t.start()
+        for url in urls:
+            queue.put(url)
+    queue.join()
 
 if __name__ == "__main__":
     if sys.argv[1] == "-t":
