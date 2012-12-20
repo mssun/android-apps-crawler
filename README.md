@@ -34,3 +34,7 @@ Supported Third-party Markets
 * android.d.cn: http://android.d.cn
 * mumayi: http://www.mumayi.com
 * Keep adding...
+
+More Android Markets
+--------------------
+See: https://github.com/mssun/android-markets-list
