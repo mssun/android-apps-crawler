@@ -28,14 +28,16 @@ ALLOWED_DOMAINS = [
     #"hiapk.com",
     #"anzhi.com",
     #"android.d.cn",
-    "mumayi.com"
+    #"mumayi.com",
+    "gfan.com",
 ]
 START_URLS = [
     #"http://www.appchina.com",
     #"http://apk.hiapk.com",
     #"http://www.anzhi.com",
     #"http://android.d.cn",
-    "http://www.mumayi.com",
+    #"http://www.mumayi.com",
+    "http://apk.gfan.com",
 ]
 SCRAPE_RULES = {
     "xpath" : {
@@ -43,6 +45,7 @@ SCRAPE_RULES = {
         "hiapk" : "//a[@class='linkbtn d1']/@href",
         "android.d.cn" : "//a[@class='down']/@href",
         "mumayi" : "//a[@class='download fl']/@href",
+        "gfan" : "//a[@id='computerLoad']/@href",
     },
     "custom_parser" : {
         "anzhi" : "parse_anzhi", 
