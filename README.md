@@ -33,6 +33,7 @@ Supported Third-party Markets
 * Anzhi: http://www.anzhi.com
 * android.d.cn: http://android.d.cn
 * mumayi: http://www.mumayi.com
+* gfan: http://apk.gfan.com
 * Keep adding...
 
 More Android Markets
