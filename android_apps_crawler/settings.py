@@ -29,7 +29,9 @@ ALLOWED_DOMAINS = [
     #"anzhi.com",
     #"android.d.cn",
     #"mumayi.com",
-    "gfan.com",
+    #"gfan.com",
+    #"nduoa.com",
+    "3gyu.com",
 ]
 START_URLS = [
     #"http://www.appchina.com",
@@ -37,7 +39,9 @@ START_URLS = [
     #"http://www.anzhi.com",
     #"http://android.d.cn",
     #"http://www.mumayi.com",
-    "http://apk.gfan.com",
+    #"http://apk.gfan.com",
+    #"http://www.nduoa.com",
+    "http://www.3gyu.com",
 ]
 SCRAPE_RULES = {
     "xpath" : {
@@ -46,6 +50,8 @@ SCRAPE_RULES = {
         "android.d.cn" : "//a[@class='down']/@href",
         "mumayi" : "//a[@class='download fl']/@href",
         "gfan" : "//a[@id='computerLoad']/@href",
+        "nduoa" : "//a[@class='d_pc_normal']/@href",
+        "3gyu" : "//a[@class='ldownload']/@href",
     },
     "custom_parser" : {
         "anzhi" : "parse_anzhi", 
