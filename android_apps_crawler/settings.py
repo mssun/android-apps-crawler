@@ -31,7 +31,8 @@ ALLOWED_DOMAINS = [
     #"mumayi.com",
     #"gfan.com",
     #"nduoa.com",
-    "3gyu.com",
+    #"3gyu.com",
+    "angeeks.com",
 ]
 START_URLS = [
     #"http://www.appchina.com",
@@ -41,7 +42,8 @@ START_URLS = [
     #"http://www.mumayi.com",
     #"http://apk.gfan.com",
     #"http://www.nduoa.com",
-    "http://www.3gyu.com",
+    #"http://www.3gyu.com",
+    "http://www.angeeks.com",
 ]
 SCRAPE_RULES = {
     "xpath" : {
@@ -52,6 +54,7 @@ SCRAPE_RULES = {
         "gfan" : "//a[@id='computerLoad']/@href",
         "nduoa" : "//a[@class='d_pc_normal']/@href",
         "3gyu" : "//a[@class='ldownload']/@href",
+        "angeeks" : "//div[@class='rgmainsrimg'][1]/a/@href",
     },
     "custom_parser" : {
         "anzhi" : "parse_anzhi", 

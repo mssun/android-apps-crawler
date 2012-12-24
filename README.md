@@ -36,6 +36,7 @@ Supported Third-party Markets
 * gfan: http://apk.gfan.com
 * nduoa: http://www.nduoa.com
 * 3gyu: http://www.3gyu.com
+* angeeks: http://apk.angeeks.com
 * Keep adding...
 
 More Android Markets

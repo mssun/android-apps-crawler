@@ -113,7 +113,10 @@ def get_undownloaded_url(sqlite_file, limit=1000):
     conn = sqlite3.connect(sqlite_file)
     urls = []
     c = conn.cursor()
-    c.execute('select * from apps where downloaded = 0 limit %d' % limit)
+    if limit is None:
+        c.execute('select * from apps where downloaded = 0')
+    else:
+        c.execute('select * from apps where downloaded = 0 limit %d' % limit)
     rec = c.fetchall()
     for r in rec:
         urls.append(r[1])
@@ -124,7 +127,7 @@ def get_undownloaded_url(sqlite_file, limit=1000):
 def down_sqlite(argv):
     repo = argv[1]
     sqlite_file = argv[2]
-    urls = get_undownloaded_url(sqlite_file)
+    urls = get_undownloaded_url(sqlite_file, limit=None)
     queue = Queue.Queue()
     for url in urls:
         queue.put(url)
