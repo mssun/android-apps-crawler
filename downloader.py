@@ -39,13 +39,18 @@ class Downloader:
         except urllib2.HTTPError:
             print "HTTPError" 
             return False
-        meta = self.opening.info()
-        #print meta
-        self.file_size = int(meta.getheaders("Content-Length")[0])
-        last_modified_str = meta.getheaders("Last-Modified")[0]
-        self.last_modified = datetime.strptime(last_modified_str,
-                '%a, %d %b %Y %H:%M:%S %Z')
-        #print "Last modified: %s" % self.last_modified
+        try:
+            meta = self.opening.info()
+            #print meta
+            self.file_size = int(meta.getheaders("Content-Length")[0])
+            last_modified_str = meta.getheaders("Last-Modified")[0]
+            self.last_modified = datetime.strptime(last_modified_str,
+                    '%a, %d %b %Y %H:%M:%S %Z')
+            #print "Last modified: %s" % self.last_modified
+        except:
+            pass
+        finally:
+            return False
         return True
 
     

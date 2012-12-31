@@ -4,6 +4,7 @@ from scrapy import log
 
 import sqlite3
 from os import path
+from android_apps_crawler import settings
 
 
 class AppPipeline(object):
@@ -12,9 +13,12 @@ class AppPipeline(object):
         return item
 
 class SQLitePipeline(object):
-    filename = 'apps_database.db'
+    filename = ''
     conn = None
     def __init__(self):
+        for d in settings.ALLOWED_DOMAINS:
+            self.filename += d
+        self.filename += ".db"
         self.conn = None
         dispatcher.connect(self.initialize, signals.engine_started)
         dispatcher.connect(self.initialize, signals.engine_stopped)
