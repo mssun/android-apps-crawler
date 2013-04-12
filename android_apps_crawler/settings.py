@@ -27,29 +27,29 @@ ALLOWED_DOMAINS = [
     #"appchina.com",
     #"hiapk.com",
     #"anzhi.com",
-    #"android.d.cn",
+    "android.d.cn",
     #"mumayi.com",
     #"gfan.com",
     #"nduoa.com",
     #"3gyu.com",
-    "angeeks.com",
+    #"angeeks.com",
 ]
 START_URLS = [
     #"http://www.appchina.com",
     #"http://apk.hiapk.com",
     #"http://www.anzhi.com",
-    #"http://android.d.cn",
+    "http://android.d.cn",
     #"http://www.mumayi.com",
     #"http://apk.gfan.com",
     #"http://www.nduoa.com",
     #"http://www.3gyu.com",
-    "http://www.angeeks.com",
+    #"http://www.angeeks.com",
 ]
 SCRAPE_RULES = {
     "xpath" : {
         "appchina" : "//a[@id='pc-download' and @class='free']/@href",
         "hiapk" : "//a[@class='linkbtn d1']/@href",
-        "android.d.cn" : "//a[@class='down']/@href",
+        "android.d.cn" : "//a[@class='localDownload']/@href",
         "mumayi" : "//a[@class='download fl']/@href",
         "gfan" : "//a[@id='computerLoad']/@href",
         "nduoa" : "//a[@class='d_pc_normal']/@href",
@@ -57,6 +57,6 @@ SCRAPE_RULES = {
         "angeeks" : "//div[@class='rgmainsrimg'][1]/a/@href",
     },
     "custom_parser" : {
-        "anzhi" : "parse_anzhi", 
+        "anzhi" : "parse_anzhi",
     },
 }
