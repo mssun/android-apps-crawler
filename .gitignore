@@ -1,5 +1,4 @@
 *.pyc
 .scrapy
-apps_database*
-repository
-trash
+repo/databases
+repo/apps
