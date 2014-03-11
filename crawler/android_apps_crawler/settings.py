@@ -11,10 +11,10 @@ BOT_NAME = 'android_apps_crawler'
 SPIDER_MODULES = ['android_apps_crawler.spiders']
 NEWSPIDER_MODULE = 'android_apps_crawler.spiders'
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11(KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11"
-ITEM_PIPELINES = [
-    'android_apps_crawler.pipelines.AppPipeline',
-    'android_apps_crawler.pipelines.SQLitePipeline'
-]
+ITEM_PIPELINES = {
+    'android_apps_crawler.pipelines.AppPipeline': 1,
+    'android_apps_crawler.pipelines.SQLitePipeline': 2,
+}
 LOG_LEVEL = 'INFO'
 DOWNLOADER_MIDDLEWARES = {
     'android_apps_crawler.middlewares.DownloaderMiddleware': 1,
@@ -27,23 +27,25 @@ ALLOWED_DOMAINS = [
     #"appchina.com",
     #"hiapk.com",
     #"anzhi.com",
-    "android.d.cn",
+    #"android.d.cn",
     #"mumayi.com",
     #"gfan.com",
     #"nduoa.com",
     #"3gyu.com",
     #"angeeks.com",
+    "appfun.cn",
 ]
 START_URLS = [
     #"http://www.appchina.com",
     #"http://apk.hiapk.com",
     #"http://www.anzhi.com",
-    "http://android.d.cn",
+    #"http://android.d.cn",
     #"http://www.mumayi.com",
     #"http://apk.gfan.com",
     #"http://www.nduoa.com",
     #"http://www.3gyu.com",
     #"http://www.angeeks.com",
+    "http://www.appfun.cn",
 ]
 SCRAPE_RULES = {
     "xpath" : {
@@ -55,8 +57,10 @@ SCRAPE_RULES = {
         "nduoa" : "//a[@class='d_pc_normal']/@href",
         "3gyu" : "//a[@class='ldownload']/@href",
         "angeeks" : "//div[@class='rgmainsrimg'][1]/a/@href",
+        "appfun" : "//a[@class='downcp']/@href",
     },
     "custom_parser" : {
         "anzhi" : "parse_anzhi",
     },
 }
+DATABASE_DIR = "../repo/databases/"

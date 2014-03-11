@@ -19,6 +19,8 @@ class SQLitePipeline(object):
         for d in settings.ALLOWED_DOMAINS:
             self.filename += d
         self.filename += ".db"
+        self.filename = path.join(settings.DATABASE_DIR, self.filename)
+        print self.filename
         self.conn = None
         dispatcher.connect(self.initialize, signals.engine_started)
         dispatcher.connect(self.initialize, signals.engine_stopped)
@@ -39,15 +41,15 @@ class SQLitePipeline(object):
             self.conn = sqlite3.connect(self.filename)
         else:
             self.create_table()
-        self.conn.execute("PRAGMA journal_mode=WAL;")
+        # self.conn.execute("PRAGMA journal_mode=WAL;")
         self.conn.commit()
-        
+
     def finalize(self):
         if self.conn is not None:
             self.conn.commit()
             self.conn.close()
             self.conn = None
-    
+
     def create_table(self):
         self.conn = sqlite3.connect(self.filename)
         self.conn.execute("create table apps( \

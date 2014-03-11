@@ -1,7 +1,7 @@
 import re
 
-from scrapy.spider import BaseSpider
-from scrapy.selector import HtmlXPathSelector
+from scrapy.spider import Spider
+from scrapy.selector import Selector
 from scrapy.http import Request
 from scrapy.http import HtmlResponse
 from scrapy import log
@@ -14,7 +14,7 @@ from android_apps_crawler import settings
 from android_apps_crawler import custom_parser
 
 
-class AndroidAppsSpider(BaseSpider):
+class AndroidAppsSpider(Spider):
     name = "android_apps_spider"
     allowed_domains = settings.ALLOWED_DOMAINS
     start_urls = settings.START_URLS
@@ -34,7 +34,7 @@ class AndroidAppsSpider(BaseSpider):
         for key in custom_parser_rule.keys():
             if key in response_domain:
                 appItemList.extend(
-                        getattr(custom_parser, custom_parser_rule[key])(response)) 
+                        getattr(custom_parser, custom_parser_rule[key])(response))
                 break
         #if "appchina" in response_domain:
         #    xpath = "//a[@id='pc-download' and @class='free']/@href"
@@ -50,8 +50,8 @@ class AndroidAppsSpider(BaseSpider):
         #    appItemList.extend(self.parse_anzhi(response, xpath))
         #else:
         #    pass
-        hxs = HtmlXPathSelector(response)
-        for url in hxs.select('//a/@href').extract():
+        sel = Selector(response)
+        for url in sel.xpath('//a/@href').extract():
             url = urljoin(response.url, url)
             yield Request(url, meta=cookie, callback=self.parse)
 
@@ -71,18 +71,18 @@ class AndroidAppsSpider(BaseSpider):
     #        appItem['url'] = url
     #        appItemList.append(appItem)
     #    return appItemList
-    
+
     def parse_xpath(self, response, xpath):
         appItemList = []
-        hxs = HtmlXPathSelector(response)
-        for url in hxs.select(xpath).extract():
+        sel = Selector(response)
+        for url in sel.xpath(xpath).extract():
             url = urljoin(response.url, url)
             log.msg("Catch an application: %s" % url, level=log.INFO)
             appItem = AppItem()
             appItem['url'] = url
             appItemList.append(appItem)
         return appItemList
-    
+
     #def parse_anzhi(self, response, xpath):
     #    appItemList = []
     #    hxs = HtmlXPathSelector(response)
@@ -94,4 +94,4 @@ class AndroidAppsSpider(BaseSpider):
     #        appItemList.append(appItem)
     #    return appItemList
 
-            
+
