@@ -24,7 +24,7 @@ PROXIES = {
 }
 
 ALLOWED_DOMAINS = [
-    #"appchina.com",
+    "appchina.com",
     #"hiapk.com",
     #"anzhi.com",
     #"android.d.cn",
@@ -33,10 +33,10 @@ ALLOWED_DOMAINS = [
     #"nduoa.com",
     #"3gyu.com",
     #"angeeks.com",
-    "appfun.cn",
+    #"appfun.cn",
 ]
 START_URLS = [
-    #"http://www.appchina.com",
+    "http://www.appchina.com",
     #"http://apk.hiapk.com",
     #"http://www.anzhi.com",
     #"http://android.d.cn",
@@ -45,11 +45,12 @@ START_URLS = [
     #"http://www.nduoa.com",
     #"http://www.3gyu.com",
     #"http://www.angeeks.com",
-    "http://www.appfun.cn",
+    #"http://www.appfun.cn",
 ]
 SCRAPE_RULES = {
     "xpath" : {
-        "appchina" : "//a[@id='pc-download' and @class='free']/@href",
+        #"appchina" : "//a[@id='pc-download' and @class='free']/@href",
+        "appchina" : "//a[@class='download-pc fl']/@href",
         "hiapk" : "//a[@class='linkbtn d1']/@href",
         "android.d.cn" : "//a[@class='localDownload']/@href",
         "mumayi" : "//a[@class='download fl']/@href",
