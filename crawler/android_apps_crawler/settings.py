@@ -24,25 +24,25 @@ PROXIES = {
 }
 
 ALLOWED_DOMAINS = [
-    "appchina.com",
+    #"appchina.com",
     #"hiapk.com",
     #"anzhi.com",
     #"android.d.cn",
     #"mumayi.com",
     #"gfan.com",
-    #"nduoa.com",
+    "nduoa.com",
     #"3gyu.com",
     #"angeeks.com",
     #"appfun.cn",
 ]
 START_URLS = [
-    "http://www.appchina.com",
+    #"http://www.appchina.com",
     #"http://apk.hiapk.com",
     #"http://www.anzhi.com",
     #"http://android.d.cn",
     #"http://www.mumayi.com",
     #"http://apk.gfan.com",
-    #"http://www.nduoa.com",
+    "http://www.nduoa.com",
     #"http://www.3gyu.com",
     #"http://www.angeeks.com",
     #"http://www.appfun.cn",
