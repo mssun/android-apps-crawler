@@ -102,7 +102,7 @@ class Monitor(threading.Thread):
     def run(self):
         while not self.exit_event.isSet():
             for t in self.threads:
-                print("%2f" % (t.report())),
+                print("%3.0f%%" % (t.report()*100)),
             print("")
             time.sleep(1)
 
