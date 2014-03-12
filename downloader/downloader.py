@@ -1,215 +1,193 @@
-from datetime import datetime
-import os
-import hashlib
+#!/usr/bin/env python
+# encoding: utf-8
+import sys
+import threading
+import sqlite3
 import time
 import urllib2
-import sys
-import sqlite3
-from multiprocessing import Process, Lock
-from threading import Thread
+import os
+import hashlib
+import signal
 import Queue
-from android_apps_crawler import settings
 
-class Downloader:
-    proxies = {}
-    url = ""
-    file_name = ""
-    file_size = None
-    last_modified = None
-    opening = None
-    repo = None
-    
+NUM_THREAD = 10
+work_queue_lock = threading.Lock()
 
-    def __init__(self, repo, proxies={}):
-        self.proxies = proxies
-        self.repo = repo
-        self.start_time = time.time()
-
-    def open(self, url):
-        self.url = url
+class Downloader(threading.Thread):
+    def __init__(self, work_queue, output_dir):
+        threading.Thread.__init__(self)
+        self.exit_event = threading.Event()
+        self.work_queue = work_queue
+        self.proxies = {"http": "proxy.cse.cuhk.edu.hk:8000"}
+        self.output_dir = output_dir
+        self.current_file_size = 0
+        self.file_size = 0
+    def exit(self):
+        print "Thread asked to exit, messaging run"
+        self.exit_event.set()
+        self.join()
+        return self.report()
+    def report(self):
+        if self.file_size == 0:
+            return 0.0
+        return float(self.current_file_size) / self.file_size
+    def run(self):
+        while not self.exit_event.isSet():
+            work_queue_lock.acquire()
+            if not self.work_queue.empty():
+                self.url = self.work_queue.get()
+                work_queue_lock.release()
+                self.download()
+                self.save()
+            else:
+                work_queue_lock.release()
+        print("Thread run received exit event")
+    def download(self):
+        self.current_file_size = 0
+        self.file_size = 0
         proxy_handler = urllib2.ProxyHandler(self.proxies)
         opener = urllib2.build_opener(proxy_handler)
         opener.addheaders = [
-            ('User-Agent',r"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11"),
-            ('Referer', url)
+            ('User-Agent', r"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11"),
+            ('Referer', self.url)
         ]
         urllib2.install_opener(opener)
-        try:
-            self.opening = urllib2.urlopen(self.url)
-        except urllib2.HTTPError:
-            print "HTTPError" 
-            return False
-        try:
-            meta = self.opening.info()
-            #print meta
-            self.file_size = int(meta.getheaders("Content-Length")[0])
-            last_modified_str = meta.getheaders("Last-Modified")[0]
-            self.last_modified = datetime.strptime(last_modified_str,
-                    '%a, %d %b %Y %H:%M:%S %Z')
-            #print "Last modified: %s" % self.last_modified
-        except:
-            pass
-        finally:
-            return False
-        return True
+        opening = urllib2.urlopen(self.url)
+        meta = opening.info()
+        self.file_size = int(meta.getheaders("Content-Length")[0])
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+        temp_dir = self.output_dir + os.sep + "temp"
+        if not os.path.exists(temp_dir):
+            os.makedirs(temp_dir)
+        temp_file_name = "%d.apk" % (time.time() * 1000000)
+        self.temp_output_path = temp_dir + os.sep + temp_file_name
+        print("Start downloading %s" % self.url)
+        with open(self.temp_output_path, 'wb') as fil:
+            block_size = 10240
+            while True:
+                buf = opening.read(block_size)
+                self.current_file_size += len(buf)
+                fil.write(buf)
+                if not buf:
+                    break
+    def save(self):
+        with open(self.temp_output_path, 'r') as fil:
+            m = hashlib.md5()
+            m.update(fil.read())
+            md5_digest = m.hexdigest()
+        new_output_path = self.output_dir + os.sep + md5_digest + ".apk"
+        if os.path.isfile(new_output_path):
+            os.remove(new_output_path)
+        os.rename(self.temp_output_path, new_output_path)
+        print("Finished downloading %s" % (md5_digest))
 
-    
-    def download(self):
-        timestamp = time.time() * 1000000
-        self.file_name = "%d.apk" % timestamp
-        if not os.path.exists(self.repo):
-            os.makedirs(self.repo)
-            os.makedirs(self.repo + os.sep +"tmp") 
-        tmp_file_path = self.repo + os.sep + "tmp" + os.sep + self.file_name
-        f = open(tmp_file_path, 'wb')
-        #print "Downloading: %s Bytes: %s" % (self.file_name, self.file_size)
-        self.file_size_dl = 0
-        block_sz = 8192
-        while True:
-            buffer = self.opening.read(block_sz)
-            if not buffer:
-                break
+class Monitor(threading.Thread):
+    def __init__(self, threads):
+        threading.Thread.__init__(self)
+        self.threads = threads
+        self.exit_event = threading.Event()
+    def exit(self):
+        self.exit_event.set()
+        self.join()
+    def run(self):
+        while not self.exit_event.isSet():
+            for t in self.threads:
+                print("%2f" % (t.report())),
+            print("")
+            time.sleep(1)
 
-            self.file_size_dl += len(buffer)
-            f.write(buffer)
-            self.print_status()
-            #end_time = time.time()
-            #cost_time = end_time - start_time
-            #if cost_time == 0:
-            #    cost_time = 1
-            #rate =  file_size_dl * 100. / 1024 / 1024 / cost_time
-            #progress =  file_size_dl * 100. / self.file_size
-            #
-            #status = "\r%10d  [%3.2f%%]  %3dk/s" % (file_size_dl,
-            #        progress,
-            #        rate)
-            #print status,
-            #sys.stdout.flush()
-        f.close()
+def get_undownloaded_url(database_filepath):
+    undownloaded_urls = []
+    connection = sqlite3.connect(database_filepath)
+    cursor = connection.cursor()
+    sql = "select * from apps where downloaded = 0 limit 10"
+    cursor.execute(sql)
+    records = cursor.fetchall()
+    undownloaded_urls = [r[1] for r in records]
+    connection.close()
+    return undownloaded_urls
 
-        f = open(tmp_file_path, 'r')
-        m = hashlib.md5()
-        m.update(f.read())
-        md5_value = m.hexdigest()
-        f.close()
-        new_file_name = md5_value + ".apk"
-        new_path = self.repo + os.sep + new_file_name
-        if os.path.isfile(new_path):
-            os.remove(tmp_file_path)
+def fill_work_queue(work_queue, undownloaded_urls):
+    for u in undownloaded_urls:
+        work_queue.put(u)
+
+def import_work(work_queue, database_filepath):
+    undownloaded_urls = get_undownloaded_url(database_filepath)
+    fill_work_queue(work_queue, undownloaded_urls)
+
+"""
+http://code.activestate.com/recipes/496735-workaround-for-missed-sigint-in-multithreaded-prog/
+"""
+class Watcher:
+    """this class solves two problems with multithreaded
+    programs in Python, (1) a signal might be delivered
+    to any thread (which is just a malfeature) and (2) if
+    the thread that gets the signal is waiting, the signal
+    is ignored (which is a bug).
+
+    The watcher is a concurrent process (not thread) that
+    waits for a signal and the process that contains the
+    threads.  See Appendix A of The Little Book of Semaphores.
+    http://greenteapress.com/semaphores/
+
+    I have only tested this on Linux.  I would expect it to
+    work on the Macintosh and not work on Windows.
+    """
+
+    def __init__(self):
+        """ Creates a child thread, which returns.  The parent
+            thread waits for a KeyboardInterrupt and then kills
+            the child thread.
+        """
+        self.child = os.fork()
+        if self.child == 0:
+            return
         else:
-            os.rename(tmp_file_path, new_path)
-        print "Finish! Store as: %s" % new_file_name
-    def print_status(self):
-        file_name, file_size, progress, rate = self.get_status()
-        print "\r%10d [%3.2f%%] %3dk/s" % (file_size, progress, rate),
-        sys.stdout.flush()
+            self.watch()
 
-    def get_status(self):
-        end_time = time.time()
-        cost_time = end_time - self.start_time
-        if cost_time == 0:
-            cost_time = 1
-        rate =  self.file_size_dl   / 1024 / cost_time
-        progress =  self.file_size_dl * 100. / self.file_size
-        status = [self.file_name, self.file_size, progress, rate]
-        return status
+    def watch(self):
+        try:
+            os.wait()
+        except KeyboardInterrupt:
+            # I put the capital B in KeyBoardInterrupt so I can
+            # tell when the Watcher gets the SIGINT
+            print 'KeyBoardInterrupt'
+            self.kill()
+        sys.exit()
 
-def get_undownloaded_url(sqlite_file, limit=1000):
-    conn = sqlite3.connect(sqlite_file)
-    urls = []
-    c = conn.cursor()
-    if limit is None:
-        c.execute('select * from apps where downloaded = 0')
+    def kill(self):
+        try:
+            os.kill(self.child, signal.SIGKILL)
+        except OSError: pass
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: %s <SQLite database> <output directory>" % (sys.argv[0]))
+        sys.exit(1)
     else:
-        c.execute('select * from apps where downloaded = 0 limit %d' % limit)
-    rec = c.fetchall()
-    for r in rec:
-        urls.append(r[1])
-    conn.close()
-    return urls
-    
+        database_filepath = sys.argv[1]
+        output_dir = sys.argv[2]
 
-def down_sqlite(argv):
-    repo = argv[1]
-    sqlite_file = argv[2]
-    urls = get_undownloaded_url(sqlite_file, limit=None)
-    queue = Queue.Queue()
-    for url in urls:
-        queue.put(url)
-    for i in range(2):
-        t = DownloadThread(queue, repo, sqlite_file, settings.PROXIES)
+    Watcher()
+    threads = []
+    work_queue = Queue.Queue()
+    for i in range(NUM_THREAD):
+        t = Downloader(work_queue, output_dir)
         t.daemon = True
         t.start()
-    #while True:
-    #    time.sleep(5)
-    #    if (queue.qsize() < 5):
-    #        pass
-    queue.join()
-    #while True:
-    #    c = conn.cursor()
-    #    c.execute('select * from apps where downloaded = 0 limit 1')
-    #    rec = c.fetchone()
-    #    url = unicode.encode(rec[1], 'gbk')
-    #    downloader = Downloader(repo=repo, proxies={"http":"http://proxy.cse.cuhk.edu.hk:8000"})
-    #    if downloader.open(url) is not True:
-    #        c.execute('update apps set downloaded = -1 where url = ?', (url,))
-    #        conn.commit()
-    #        continue
-    #    downloader.download()
-    #    c.execute('update apps set downloaded = 1 where url = ?', (url,))
-    #    conn.commit()
-    #    #time.sleep(5)
-    #conn.close()
+        threads.append(t)
+    monitor_thread = Monitor(threads)
+    monitor_thread.daemon = True
+    monitor_thread.start()
 
-class DownloadThread(Thread):
-    def __init__(self, queue, repo, sqlite_file, proxies):
-        Thread.__init__(self)
-        self.repo = repo
-        self.proxies = proxies
-        self.sqlite_file = sqlite_file
-        self.queue = queue
-        #self.status_queue = status_queue
-    def run(self):
-        conn = sqlite3.connect(self.sqlite_file)
-        c = conn.cursor()
-        while True:
-            url = self.queue.get()
-            downloader = Downloader(repo=self.repo, proxies=self.proxies)
-            if downloader.open(url) is not True:
-                c.execute('update apps set downloaded = -1 where url = ?', (url,))
-                conn.commit()
-            downloader.download()
-            c.execute('update apps set downloaded = 1 where url = ?', (url,))
-            conn.commit()
-            self.queue.task_done()
+    import_work(work_queue, database_filepath)
 
-def test(argv):
-    #if len(argv) <= 1:
-    #    print "error"
-    #else:
-    #    url = argv[3]
-    #    repo =argv[2]
-    #    downloader = Downloader(repo=repo, proxies={"http":"http://proxy.cse.cuhk.edu.hk:8000"})
-    #    downloader.open(url)
-    #    downloader.download()
-    urls = []
-    conn = sqlite3.connect(argv[2])
-    c = conn.cursor()
-    c.execute('select * from apps where downloaded = 0 limit 15')
-    rec = c.fetchall()
-    for r in rec:
-        urls.append(r[1])
-    queue = Queue.Queue()
-    
-    for i in range(3):
-        t = DownloadProcess(queue)
-        t.start()
-        for url in urls:
-            queue.put(url)
-    queue.join()
+    while not work_queue.empty():
+        pass
+    for t in threads:
+        t.exit()
+    monitor_thread.exit()
 
-if __name__ == "__main__":
-    if sys.argv[1] == "-t":
-        test(sys.argv)
-    else:
-        down_sqlite(sys.argv)
+if __name__ == '__main__':
+    main()
