@@ -10,7 +10,7 @@ import hashlib
 import signal
 import Queue
 
-NUM_THREAD = 10
+NUM_THREAD = 20
 work_queue_lock = threading.Lock()
 
 class Downloader(threading.Thread):
@@ -38,9 +38,12 @@ class Downloader(threading.Thread):
             if not self.work_queue.empty():
                 self.url = self.work_queue.get()
                 work_queue_lock.release()
-                self.download()
-                self.save()
-                self.update_database()
+                try:
+                    self.download()
+                    self.save()
+                    self.update_database()
+                except urllib2.HTTPError:
+                    self.update_database(-1)
             else:
                 work_queue_lock.release()
         print("Thread run received exit event")
@@ -84,10 +87,10 @@ class Downloader(threading.Thread):
         os.rename(self.temp_output_path, new_output_path)
         print("Finished downloading %s" % (md5_digest))
 
-    def update_database(self):
+    def update_database(self, result=1):
         connection = sqlite3.connect(self.database_filepath)
         cursor = connection.cursor()
-        cursor.execute('update apps set downloaded = 1 where url = ?', (self.url,))
+        cursor.execute('update apps set downloaded = ? where url = ?', (result, self.url,))
         connection.commit()
 
 
@@ -110,7 +113,7 @@ def get_undownloaded_url(database_filepath):
     undownloaded_urls = []
     connection = sqlite3.connect(database_filepath)
     cursor = connection.cursor()
-    sql = "select * from apps where downloaded = 0 limit 10"
+    sql = "select * from apps where downloaded = 0"
     cursor.execute(sql)
     records = cursor.fetchall()
     undownloaded_urls = [r[1] for r in records]
