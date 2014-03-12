@@ -32,7 +32,7 @@ class Downloader(threading.Thread):
 
     def report(self):
         if self.file_size == 0:
-            return 0.0
+            return 0
         return float(self.current_file_size) / self.file_size
 
     def run(self):
@@ -52,6 +52,7 @@ class Downloader(threading.Thread):
         print("%s: received exit event." % self.getName())
 
     def download(self):
+        print("%s: downloading %s" % (self.getName(), self.url))
         self.current_file_size = 0
         self.file_size = 0
         proxy_handler = urllib2.ProxyHandler(self.proxies)
@@ -68,7 +69,6 @@ class Downloader(threading.Thread):
         temp_file_name = "%d.apk" % (time.time() * 1000000)
         temp_dir = self.output_dir + os.sep + "temp"
         self.temp_output_path = temp_dir + os.sep + temp_file_name
-        print("%s: downloading %s" % (self.getName(), self.url))
         with open(self.temp_output_path, 'wb') as fil:
             block_size = 10240
             while True:
@@ -112,7 +112,10 @@ class Monitor(threading.Thread):
     def run(self):
         while not self.exit_event.isSet():
             for t in self.threads:
-                print("%3.0f%%" % (t.report()*100)),
+                if t.report() == 0:
+                    print(" new"),
+                else:
+                    print("%3.0f%%" % (t.report()*100)),
             print("")
             time.sleep(1)
 
