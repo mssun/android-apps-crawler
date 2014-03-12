@@ -96,7 +96,7 @@ class Downloader(threading.Thread):
             cursor.execute('update apps set downloaded = ? where url = ?',
                     (result, self.url,))
             connection.commit()
-        except OperationalError:
+        except sqlite3.OperationalError:
             print("%s: Operational Error" % (self.getName()))
         finally:
             connection.close()
@@ -125,7 +125,7 @@ def get_undownloaded_url(database_filepath):
         cursor.execute(sql)
         records = cursor.fetchall()
         undownloaded_urls = [r[1] for r in records]
-    except OperationalError:
+    except sqlite3.OperationalError:
         print("get_undownloaded_url(): Operational Error.")
     finally:
         connection.close()
