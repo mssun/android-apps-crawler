@@ -23,7 +23,7 @@ scrapy crawl android_apps_spider
 ```
 * Start downloader:
 ```
-python downloader.py repository_name apps_database_name
+python downloader.py database_file_path output_directory
 ```
 
 Supported Third-party Markets
