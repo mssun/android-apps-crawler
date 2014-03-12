@@ -14,7 +14,7 @@ NUM_THREAD = 10
 work_queue_lock = threading.Lock()
 
 class Downloader(threading.Thread):
-    def __init__(self, work_queue, output_dir):
+    def __init__(self, work_queue, output_dir, database_filepath):
         threading.Thread.__init__(self)
         self.exit_event = threading.Event()
         self.work_queue = work_queue
@@ -22,6 +22,7 @@ class Downloader(threading.Thread):
         self.output_dir = output_dir
         self.current_file_size = 0
         self.file_size = 0
+        self.database_filepath = database_filepath
     def exit(self):
         print "Thread asked to exit, messaging run"
         self.exit_event.set()
@@ -39,6 +40,7 @@ class Downloader(threading.Thread):
                 work_queue_lock.release()
                 self.download()
                 self.save()
+                self.update_database()
             else:
                 work_queue_lock.release()
         print("Thread run received exit event")
@@ -81,6 +83,13 @@ class Downloader(threading.Thread):
             os.remove(new_output_path)
         os.rename(self.temp_output_path, new_output_path)
         print("Finished downloading %s" % (md5_digest))
+
+    def update_database(self):
+        connection = sqlite3.connect(self.database_filepath)
+        cursor = connection.cursor()
+        cursor.execute('update apps set downloaded = 1 where url = ?', (self.url,))
+        connection.commit()
+
 
 class Monitor(threading.Thread):
     def __init__(self, threads):
@@ -173,7 +182,7 @@ def main():
     threads = []
     work_queue = Queue.Queue()
     for i in range(NUM_THREAD):
-        t = Downloader(work_queue, output_dir)
+        t = Downloader(work_queue, output_dir, database_filepath)
         t.daemon = True
         t.start()
         threads.append(t)
