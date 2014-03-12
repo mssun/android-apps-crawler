@@ -65,12 +65,8 @@ class Downloader(threading.Thread):
         opening = urllib2.urlopen(self.url)
         meta = opening.info()
         self.file_size = int(meta.getheaders("Content-Length")[0])
-        if not os.path.exists(self.output_dir):
-            os.makedirs(self.output_dir)
-        temp_dir = self.output_dir + os.sep + "temp"
-        if not os.path.exists(temp_dir):
-            os.makedirs(temp_dir)
         temp_file_name = "%d.apk" % (time.time() * 1000000)
+        temp_dir = self.output_dir + os.sep + "temp"
         self.temp_output_path = temp_dir + os.sep + temp_file_name
         print("%s: downloading %s" % (self.getName(), self.url))
         with open(self.temp_output_path, 'wb') as fil:
@@ -94,11 +90,16 @@ class Downloader(threading.Thread):
         print("%s: %s.apk is completed." % (self.getName(), md5_digest))
 
     def update_database(self, result=1):
-        connection = sqlite3.connect(self.database_filepath)
-        cursor = connection.cursor()
-        cursor.execute('update apps set downloaded = ? where url = ?',
-                (result, self.url,))
-        connection.commit()
+        try:
+            connection = sqlite3.connect(self.database_filepath)
+            cursor = connection.cursor()
+            cursor.execute('update apps set downloaded = ? where url = ?',
+                    (result, self.url,))
+            connection.commit()
+        except OperationalError:
+            print("%s: Operational Error" % (self.getName()))
+        finally:
+            connection.close()
 
 class Monitor(threading.Thread):
     def __init__(self, threads):
@@ -117,13 +118,17 @@ class Monitor(threading.Thread):
 
 def get_undownloaded_url(database_filepath):
     undownloaded_urls = []
-    connection = sqlite3.connect(database_filepath)
-    cursor = connection.cursor()
-    sql = "select * from apps where downloaded = 0"
-    cursor.execute(sql)
-    records = cursor.fetchall()
-    undownloaded_urls = [r[1] for r in records]
-    connection.close()
+    try:
+        connection = sqlite3.connect(database_filepath)
+        cursor = connection.cursor()
+        sql = "select * from apps where downloaded = 0"
+        cursor.execute(sql)
+        records = cursor.fetchall()
+        undownloaded_urls = [r[1] for r in records]
+    except OperationalError:
+        print("get_undownloaded_url(): Operational Error.")
+    finally:
+        connection.close()
     return undownloaded_urls
 
 def fill_work_queue(work_queue, undownloaded_urls):
@@ -169,7 +174,7 @@ class Watcher:
         except KeyboardInterrupt:
             # I put the capital B in KeyBoardInterrupt so I can
             # tell when the Watcher gets the SIGINT
-            print 'KeyBoardInterrupt'
+            print("KeyBoardInterrupt")
             self.kill()
         sys.exit()
 
@@ -186,6 +191,11 @@ def main():
         database_filepath = sys.argv[1]
         output_dir = sys.argv[2]
 
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    temp_dir = output_dir + os.sep + "temp"
+    if not os.path.exists(temp_dir):
+        os.makedirs(temp_dir)
     Watcher()
     threads = []
     work_queue = Queue.Queue()
