@@ -23,15 +23,18 @@ class Downloader(threading.Thread):
         self.current_file_size = 0
         self.file_size = 0
         self.database_filepath = database_filepath
+
     def exit(self):
-        print "Thread asked to exit, messaging run"
+        print("%s: asked to exit." % self.getName())
         self.exit_event.set()
         self.join()
         return self.report()
+
     def report(self):
         if self.file_size == 0:
             return 0.0
         return float(self.current_file_size) / self.file_size
+
     def run(self):
         while not self.exit_event.isSet():
             work_queue_lock.acquire()
@@ -46,14 +49,16 @@ class Downloader(threading.Thread):
                     self.update_database(-1)
             else:
                 work_queue_lock.release()
-        print("Thread run received exit event")
+        print("%s: received exit event." % self.getName())
+
     def download(self):
         self.current_file_size = 0
         self.file_size = 0
         proxy_handler = urllib2.ProxyHandler(self.proxies)
         opener = urllib2.build_opener(proxy_handler)
         opener.addheaders = [
-            ('User-Agent', r"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11"),
+            ('User-Agent', r"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 "
+                "(KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11"),
             ('Referer', self.url)
         ]
         urllib2.install_opener(opener)
@@ -67,7 +72,7 @@ class Downloader(threading.Thread):
             os.makedirs(temp_dir)
         temp_file_name = "%d.apk" % (time.time() * 1000000)
         self.temp_output_path = temp_dir + os.sep + temp_file_name
-        print("Start downloading %s" % self.url)
+        print("%s: downloading %s" % (self.getName(), self.url))
         with open(self.temp_output_path, 'wb') as fil:
             block_size = 10240
             while True:
@@ -76,6 +81,7 @@ class Downloader(threading.Thread):
                 fil.write(buf)
                 if not buf:
                     break
+
     def save(self):
         with open(self.temp_output_path, 'r') as fil:
             m = hashlib.md5()
@@ -85,14 +91,14 @@ class Downloader(threading.Thread):
         if os.path.isfile(new_output_path):
             os.remove(new_output_path)
         os.rename(self.temp_output_path, new_output_path)
-        print("Finished downloading %s" % (md5_digest))
+        print("%s: %s.apk is completed." % (self.getName(), md5_digest))
 
     def update_database(self, result=1):
         connection = sqlite3.connect(self.database_filepath)
         cursor = connection.cursor()
-        cursor.execute('update apps set downloaded = ? where url = ?', (result, self.url,))
+        cursor.execute('update apps set downloaded = ? where url = ?',
+                (result, self.url,))
         connection.commit()
-
 
 class Monitor(threading.Thread):
     def __init__(self, threads):
@@ -128,9 +134,6 @@ def import_work(work_queue, database_filepath):
     undownloaded_urls = get_undownloaded_url(database_filepath)
     fill_work_queue(work_queue, undownloaded_urls)
 
-"""
-http://code.activestate.com/recipes/496735-workaround-for-missed-sigint-in-multithreaded-prog/
-"""
 class Watcher:
     """this class solves two problems with multithreaded
     programs in Python, (1) a signal might be delivered
@@ -145,6 +148,8 @@ class Watcher:
 
     I have only tested this on Linux.  I would expect it to
     work on the Macintosh and not work on Windows.
+
+    Refer to: http://code.activestate.com/recipes/496735-workaround-for-missed-sigint-in-multithreaded-prog/
     """
 
     def __init__(self):
