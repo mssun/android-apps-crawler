@@ -41,7 +41,7 @@ class SQLitePipeline(object):
             self.conn = sqlite3.connect(self.filename)
         else:
             self.create_table()
-        # self.conn.execute("PRAGMA journal_mode=WAL;")
+        self.conn.execute("PRAGMA journal_mode=WAL;")
         self.conn.commit()
 
     def finalize(self):
