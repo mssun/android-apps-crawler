@@ -23,33 +23,32 @@ PROXIES = {
     'http' : 'http://proxy.cse.cuhk.edu.hk:8000',
 }
 
-ALLOWED_DOMAINS = [
-    #"appchina.com",
-    #"hiapk.com",
-    #"anzhi.com",
-    #"android.d.cn",
-    #"mumayi.com",
-    #"gfan.com",
-    "nduoa.com",
-    #"3gyu.com",
-    #"angeeks.com",
-    #"appfun.cn",
-]
-START_URLS = [
-    #"http://www.appchina.com",
-    #"http://apk.hiapk.com",
-    #"http://www.anzhi.com",
-    #"http://android.d.cn",
-    #"http://www.mumayi.com",
-    #"http://apk.gfan.com",
-    "http://www.nduoa.com",
-    #"http://www.3gyu.com",
-    #"http://www.angeeks.com",
-    #"http://www.appfun.cn",
-]
+ALLOWED_DOMAINS = {
+    "appchina.com" : ["appchina.com",],
+    "hiapk.com"    : ["hiapk.com",],
+    "anzhi.com"    : ["anzhi.com",],
+    "android.d.cn" : ["android.d.cn",],
+    "mumayi.com"   : ["mumayi.com",],
+    "gfan.com"     : ["gfan.com",],
+    "nduoa.com"    : ["nduoa.com",],
+    "3gyu.com"     : ["3gyu.com",],
+    "angeeks.com"  : ["angeeks.com",],
+    "appfun.cn"    : ["appfun.cn",],
+}
+START_URLS = {
+    "appchina.com" : ["http://www.appchina.com",],
+    "hiapk.com"    : ["http://apk.hiapk.com",],
+    "anzhi.com"    : ["http://www.anzhi.com",],
+    "android.d.cn" : ["http://android.d.cn",],
+    "mumayi.com"   : ["http://www.mumayi.com",],
+    "gfan.com"     : ["http://apk.gfan.com",],
+    "nduoa.com"    : ["http://www.nduoa.com",],
+    "3gyu.com"     : ["http://www.3gyu.com",],
+    "angeeks.com"  : ["http://www.angeeks.com",],
+    "appfun.cn"    : ["http://www.appfun.cn",],
+}
 SCRAPE_RULES = {
     "xpath" : {
-        #"appchina" : "//a[@id='pc-download' and @class='free']/@href",
         "appchina" : "//a[@class='download-pc fl']/@href",
         "hiapk" : "//a[@class='linkbtn d1']/@href",
         "android.d.cn" : "//a[@class='localDownload']/@href",

@@ -16,9 +16,12 @@ from android_apps_crawler import custom_parser
 
 class AndroidAppsSpider(Spider):
     name = "android_apps_spider"
-    allowed_domains = settings.ALLOWED_DOMAINS
-    start_urls = settings.START_URLS
     scrape_rules = settings.SCRAPE_RULES
+
+    def __init__(self, market=None, *args, **kwargs):
+        super(AndroidAppsSpider, self).__init__(*args, **kwargs)
+        self.allowed_domains = settings.ALLOWED_DOMAINS[market]
+        self.start_urls = settings.START_URLS[market]
 
     def parse(self, response):
         response_domain = urlparse(response.url).netloc
