@@ -19,24 +19,26 @@ Usage
 * Set the proxy if you have
 * Start crawler: 
 ```
-scrapy crawl android_apps_spider
+./crawl.sh <market name>
 ```
 * Start downloader:
 ```
-python downloader.py database_file_path output_directory
+./downloader.py <database file path> <output directory>
 ```
 
-Supported Third-party Markets
+Supported Third-party Markets (market names used in crawl.sh)
 -----------------------------
-* AppChina: http://www.appchina.com
-* Hiapk: http://apk.hiapk.com
-* Anzhi: http://www.anzhi.com
-* android.d.cn: http://android.d.cn
-* mumayi: http://www.mumayi.com
-* gfan: http://apk.gfan.com
-* nduoa: http://www.nduoa.com
-* 3gyu: http://www.3gyu.com
-* angeeks: http://apk.angeeks.com
+* AppChina: http://www.appchina.com (appchina.com)
+* Hiapk: http://apk.hiapk.com (hiapk.com)
+* Anzhi: http://www.anzhi.com (anzhi.com)
+* android.d.cn: http://android.d.cn (android.d.cn)
+* mumayi: http://www.mumayi.com (mumayi.com)
+* gfan: http://apk.gfan.com (gfan.com)
+* nduoa: http://www.nduoa.com (nduoa.com)
+* 3gyu: http://www.3gyu.com (3gyu.com)
+* angeeks: http://apk.angeeks.com (angeeks.com)
+* appfun: http://www.appfun.cn (appfun.cn)
+* jimi168: http://www.jimi168.com (jimi168.com)
 * Keep adding...
 
 More Android Markets

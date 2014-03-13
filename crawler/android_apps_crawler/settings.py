@@ -34,6 +34,7 @@ ALLOWED_DOMAINS = {
     "3gyu.com"     : ["3gyu.com",],
     "angeeks.com"  : ["angeeks.com",],
     "appfun.cn"    : ["appfun.cn",],
+    "jimi168.com"  : ["jimi168.com",],
 }
 START_URLS = {
     "appchina.com" : ["http://www.appchina.com",],
@@ -46,6 +47,7 @@ START_URLS = {
     "3gyu.com"     : ["http://www.3gyu.com",],
     "angeeks.com"  : ["http://www.angeeks.com",],
     "appfun.cn"    : ["http://www.appfun.cn",],
+    "jimi168.com"  : ["http://www.jimi168.com/",],
 }
 SCRAPE_RULES = {
     "xpath" : {
@@ -58,6 +60,7 @@ SCRAPE_RULES = {
         "3gyu" : "//a[@class='ldownload']/@href",
         "angeeks" : "//div[@class='rgmainsrimg'][1]/a/@href",
         "appfun" : "//a[@class='downcp']/@href",
+        "jimi168" : "//a[@class='a_sign2']/@href",
     },
     "custom_parser" : {
         "anzhi" : "parse_anzhi",
