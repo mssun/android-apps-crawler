@@ -12,6 +12,7 @@ import Queue
 
 NUM_THREAD = 20
 work_queue_lock = threading.Lock()
+update_database_lock = threading.Lock()
 
 class Downloader(threading.Thread):
     def __init__(self, work_queue, output_dir, database_filepath):
@@ -90,6 +91,7 @@ class Downloader(threading.Thread):
         print("%s: %s.apk is completed." % (self.getName(), md5_digest))
 
     def update_database(self, result=1):
+        update_database_lock.acquire()
         try:
             connection = sqlite3.connect(self.database_filepath)
             cursor = connection.cursor()
@@ -100,6 +102,7 @@ class Downloader(threading.Thread):
             print("%s: Operational Error" % (self.getName()))
         finally:
             connection.close()
+            update_database_lock.release()
 
 class Monitor(threading.Thread):
     def __init__(self, threads):
