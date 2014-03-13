@@ -67,3 +67,4 @@ SCRAPE_RULES = {
     },
 }
 DATABASE_DIR = "../repo/databases/"
+MARKET_NAME = ""

@@ -16,8 +16,7 @@ class SQLitePipeline(object):
     filename = ''
     conn = None
     def __init__(self):
-        for d in settings.ALLOWED_DOMAINS:
-            self.filename += d
+        self.filename += settings.MARKET_NAME
         self.filename += ".db"
         self.filename = path.join(settings.DATABASE_DIR, self.filename)
         print self.filename

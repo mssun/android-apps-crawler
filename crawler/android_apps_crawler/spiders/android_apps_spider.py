@@ -18,10 +18,12 @@ class AndroidAppsSpider(Spider):
     name = "android_apps_spider"
     scrape_rules = settings.SCRAPE_RULES
 
-    def __init__(self, market=None, *args, **kwargs):
+    def __init__(self, market=None, database_dir="../repo/databases/", *args, **kwargs):
         super(AndroidAppsSpider, self).__init__(*args, **kwargs)
         self.allowed_domains = settings.ALLOWED_DOMAINS[market]
         self.start_urls = settings.START_URLS[market]
+        settings.MARKET_NAME = market
+        settings.DATABASE_DIR = database_dir
 
     def parse(self, response):
         response_domain = urlparse(response.url).netloc
