@@ -141,6 +141,7 @@ def fill_work_queue(work_queue, undownloaded_urls):
 def import_work(work_queue, database_filepath):
     undownloaded_urls = get_undownloaded_url(database_filepath)
     fill_work_queue(work_queue, undownloaded_urls)
+    return len(undownloaded_urls)
 
 class Watcher:
     """this class solves two problems with multithreaded
@@ -211,10 +212,15 @@ def main():
     monitor_thread.daemon = True
     monitor_thread.start()
 
-    import_work(work_queue, database_filepath)
-
-    while not work_queue.empty():
-        pass
+    exit_flag = 0
+    while exit_flag < 2:
+        import_work(work_queue, database_filepath)
+        if work_queue.empty():
+            exit_flag += 1
+        else:
+            exit_flag = 0
+        while not work_queue.empty():
+            time.sleep(10)
     for t in threads:
         t.exit()
     monitor_thread.exit()
