@@ -37,6 +37,7 @@ ALLOWED_DOMAINS = {
     "jimi168.com"  : ["jimi168.com",],
     "7723.com"     : ["7723.com",],
     "777ccc.com"   : ["777ccc.com",],
+    "anruan.com"   : ["anruan.com",],
 }
 START_URLS = {
     "appchina.com" : ["http://www.appchina.com",],
@@ -52,6 +53,7 @@ START_URLS = {
     "jimi168.com"  : ["http://www.jimi168.com/",],
     "7723.com"     : ["http://www.7723.com",],
     "777ccc.com"   : ["http://www.777ccc.com",],
+    "anruan.com"   : ["http://www.anruan.com",],
 }
 SCRAPE_RULES = {
     "xpath" : {
@@ -67,6 +69,7 @@ SCRAPE_RULES = {
         "jimi168"      : "//a[@class='a_sign2']/@href",
         "7723"         : "//ul[@class='download_list']/li/h5/a/@href",
         "777ccc"       : "//a[@class='downtopc']/@href",
+        "anruan"       : "//a[@class='ldownload']/@href",
     },
     "custom_parser" : {
         "anzhi" : "parse_anzhi",
