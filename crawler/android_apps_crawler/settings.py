@@ -19,9 +19,11 @@ LOG_LEVEL = 'INFO'
 DOWNLOADER_MIDDLEWARES = {
     'android_apps_crawler.middlewares.DownloaderMiddleware': 1,
 }
-PROXIES = {
-    'http' : 'http://proxy.cse.cuhk.edu.hk:8000',
-}
+
+# Uncomment following statement to use proxy.
+# PROXIES = {
+#     'http' : '',
+# }
 
 ALLOWED_DOMAINS = {
     "appchina.com" : ["appchina.com",],
