@@ -12,6 +12,7 @@ Requirements
 * Python 2.6 or up
 * Scrapy 0.22 or up: http://scrapy.org (didn't have a full test in lower version.)
 * Works on Linux, Windows, Mac OSX, BSD
+* Currently, downloader cannot work on Windows.
 * For Ubuntu users, "Don't use the python-scrapy package provided by Ubuntu, 
 they are typically too old and slow to catch up with latest Scrapy. 
 Instead, use the official [Ubuntu Packages](http://doc.scrapy.org/en/latest/topics/ubuntu.html#topics-ubuntu)."
@@ -51,3 +52,8 @@ Supported Third-party Markets (market names used in crawl.sh)
 More Android Markets
 --------------------
 See: https://github.com/mssun/android-markets-list
+
+TODO
+----
+* Windows support for downloader.
+* Crawl apps from shared cloud storage link (e.g, pan.baidu.com, dbank.com).
