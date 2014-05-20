@@ -29,6 +29,10 @@ Usage
 ./downloader.py <database file path> <output directory>
 ```
 
+Settings
+--------
+You can set proxy, user-agen, database name, etc in ```crawler/android_apps_crawler/settings.py``` file.
+
 Supported Third-party Markets (market names used in crawl.sh)
 -----------------------------
 * AppChina: http://www.appchina.com (appchina.com)
