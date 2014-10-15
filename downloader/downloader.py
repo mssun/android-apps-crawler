@@ -19,7 +19,9 @@ class Downloader(threading.Thread):
         threading.Thread.__init__(self)
         self.exit_event = threading.Event()
         self.work_queue = work_queue
-        self.proxies = {"http": "proxy.cse.cuhk.edu.hk:8000"}
+        self.proxies = None
+        #Define proxy below
+        #self.proxies = {"http": ""}
         self.output_dir = output_dir
         self.current_file_size = 0
         self.file_size = 0
@@ -56,7 +58,9 @@ class Downloader(threading.Thread):
         print("%s: downloading %s" % (self.getName(), self.url))
         self.current_file_size = 0
         self.file_size = 0
-        proxy_handler = urllib2.ProxyHandler(self.proxies)
+        proxy_handler = urllib2.ProxyHandler()
+        if (self.proxies):
+            proxy_handler = urllib2.proxyHandler(self.proxies);
         opener = urllib2.build_opener(proxy_handler)
         opener.addheaders = [
             ('User-Agent', r"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 "
