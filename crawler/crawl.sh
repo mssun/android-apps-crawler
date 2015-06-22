@@ -21,7 +21,7 @@ fi
 
 if [ $# -eq 1 ]
 then
-    scrapy crawl android_apps_spider -s JOBDIR=job -a market=$1
+    scrapy crawl android_apps_spider -s JOBDIR=job_$1 -a market=$1
 else
-    scrapy crawl android_apps_spider -s JOBDIR=job -a market=$1 -a database_dir=$2
+    scrapy crawl android_apps_spider -s JOBDIR=job_$1 -a market=$1 -a database_dir=$2
 fi
